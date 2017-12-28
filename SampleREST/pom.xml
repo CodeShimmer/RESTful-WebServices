@@ -1,0 +1,236 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>RestFileUpload</groupId>
+	<artifactId>RestFileUpload</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.4</version>
+					<configuration>
+						<warSourceDirectory>WebContent</warSourceDirectory>
+						<failOnMissingWebXml>false</failOnMissingWebXml>
+						<!-- changes the default location of war deployment -->
+						<!-- commented it since we are directly deploying war to the ${catalina_home}/webapps -->
+						<!-- <warName>${warfilename}</warName> -->
+						<!-- <outputDirectory>${catalina_home}/webapps</outputDirectory> -->
+					</configuration>
+				</plugin>
+
+				<!-- we need the maven-compiler to compile java files in jdk version 
+					1.8 hence setting the source and the target -->
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.1</version>
+					<configuration>
+						<source>1.8</source>
+						<target>1.8</target>
+					</configuration>
+				</plugin>
+
+
+
+				<!-- added to deploy maven build to remote tomcat, update = true :: redeploy's 
+					the war files on update use the command : mvn clean tomcat7:deploy , which 
+					will deploy to TOMCAT 7 , ALREADY RUNNING. YOU NEED TO START THE TOMCAT SERVER 
+					FIRST. To start tomcat 7: mvn tomcat7:start -->
+				<plugin>
+					<groupId>org.apache.tomcat.maven</groupId>
+					<artifactId>tomcat7-maven-plugin</artifactId>
+					<version>2.2</version>
+					<configuration>
+						<url>${remotedeployserverurl}</url>
+						<server>tomcat7</server>
+						<path>/${project.groupId}</path>
+						<!-- configuring the tomcat7 to update itself while deploying -->
+						<update>true</update>
+						<!-- added this on 25 April -->
+					</configuration>
+				</plugin>
+
+
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>properties-maven-plugin</artifactId>
+					<version>1.0-alpha-2</version>
+					<executions>
+						<!-- Associate the read-project-properties goal with the initialize 
+							phase, to read the properties file. -->
+						<execution>
+							<phase>initialize</phase>
+							<goals>
+								<goal>read-project-properties</goal>
+							</goals>
+							<configuration>
+								<files>
+									<!-- taking the build.properties from the relative location of the 
+										pom file -->
+									<file>${propertiesfilelocation}</file>
+								</files>
+								<!-- tomcat7 listed in server node can be found in /maven/conf/setting.xml 
+									mapping username and password are defined in tomcat7_directory/conf/tomcat-users.xml -->
+								<server>tomcat7</server>
+								<username>${tomcat.manager.username}</username>
+								<password>${tomcat.manager.password}</password>
+								<url>${tomcat.manager.url}</url>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+
+
+
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<!-- customize the catalina_home for remote deployment for tomcat7, the 
+		remotedeployserverurl is http://localhost:8080/manager/text and for tomcat6 
+		http://localhost:8080/manager/html -->
+	<properties>
+		<java-version>1.8</java-version>
+		<org.springframework-version>4.0.3.RELEASE</org.springframework-version>
+		<warfilename>${project.groupId}</warfilename>
+		<!-- change the url to : http://45.79.143.163:8080/manager/text -->
+		<remotedeployserverurl> http://45.79.143.163:8080/manager/text</remotedeployserverurl>
+		<propertiesfilelocation>src/main/resources/build.properties</propertiesfilelocation>
+		<jersey2.version>2.19</jersey2.version>
+	</properties>
+
+	<dependencies>
+
+		<!-- to convert the json and parse json object -->
+
+
+		<!-- spring dependency starts -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${org.springframework-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${org.springframework-version}</version>
+		</dependency>
+
+
+
+		<!-- spring framework just added ends here -->
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${org.springframework-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${org.springframework-version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20140107</version>
+		</dependency>
+
+
+		<!-- jersey dependencies ends -->
+		<dependency>
+			<groupId>asm</groupId>
+			<artifactId>asm</artifactId>
+			<version>3.3.1</version>
+		</dependency>
+		<!-- jersey dependency ends -->
+
+		<!-- apache dbcp commons was added here , because we need threadpooling 
+			mechanism for database (Database connection pooling) -->
+		<!-- <dependency> <groupId>commons-dbcp</groupId> <artifactId>commons-dbcp</artifactId> 
+			<version>1.4</version> </dependency> -->
+
+		<!-- used for httpclient library -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.3.2</version>
+		</dependency>
+
+		<!-- mysql dependency here -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.35</version>
+		</dependency>
+
+		<!-- adding for log4j dependency for logging -->
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
+
+
+		<!-- Added 25 May: added the dependency for Jax-RS 2.0 jersey core Servlet 
+			3.x implementation -->
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet</artifactId>
+			<version>2.21</version>
+		</dependency>
+
+		<!-- Added 25 May: for jersey-client implementation -->
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>2.21</version>
+		</dependency>
+
+		<!-- dependency resolved for jax-rs -->
+
+
+		<!-- Uses this dependency to read from build.properties file. The artifact 
+			id # properties-maven-plugin -->
+		<dependency>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>properties-maven-plugin</artifactId>
+			<version>1.0-alpha-2</version>
+		</dependency>
+
+
+		<!--configured the datasource to tomcat-jdbc in spring -->
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jdbc</artifactId>
+			<version>8.0.23</version>
+		</dependency>
+		<!-- added because StringUTils was present in package, and for null checks -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.4</version>
+		</dependency>
+
+		<!-- using jersey-multipart for multipart file upload dependency on @FormInputParam 
+			that is required -->
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-multipart</artifactId>
+			<version>2.21</version>
+		</dependency>
+	</dependencies>
+</project>
